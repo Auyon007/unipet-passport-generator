@@ -67,11 +67,16 @@ if uploaded_file:
         st.warning("Please enter valid numeric values in the manual input fields!")
 
     # Step 7: Draw passport number on image with updated position and font size
+    # Always recreate the image each time to ensure the changes are reflected
+    image = Image.open(uploaded_file)  # Reload the image from uploaded file to preserve it
+
     draw = ImageDraw.Draw(image)
+    
+    # Try using a default font or load a custom one if available
     try:
         font = ImageFont.truetype("arial.ttf", font_size)
-    except:
-        font = ImageFont.load_default()
+    except IOError:
+        font = ImageFont.load_default()  # Fallback to default font if custom font is unavailable
 
     # Clear the area where the text will go (optional)
     draw.rectangle([x-5, y-5, x+200, y+font_size+10], fill="white")
