@@ -24,63 +24,68 @@ if "passport_number" not in st.session_state:
 if "generated" not in st.session_state:
     st.session_state.generated = False
 
+# Default values
+default_x = 780
+default_y = 128
+default_font_size = 20
+
 # Step 3: If file is uploaded, display the image and controls
 if uploaded_file:
     image = Image.open(uploaded_file)
 
-    # Step 4: Generate new passport number button
+    st.markdown("### Passport Number Controls")
+
+    # Generate New Passport Number Button
     if st.button("Generate New Passport Number"):
         st.session_state.passport_number = generate_passport_number()
         st.session_state.generated = True
-        st.write(f"Generated passport number: **{st.session_state.passport_number}**")
 
-    # Step 5: Show manual input field for passport number
-    st.session_state.passport_number = st.text_input("Enter a passport number (or leave blank to auto-generate):", value=st.session_state.passport_number)
+    # Manual input for passport number
+    st.session_state.passport_number = st.text_input(
+        "Enter a passport number (or leave blank to auto-generate):",
+        value=st.session_state.passport_number
+    )
 
     if not st.session_state.passport_number:
         st.session_state.passport_number = generate_passport_number()
-        st.write(f"Generated passport number: **{st.session_state.passport_number}**")
 
-    # Step 6: Sliders for position (X, Y) and font size
-    col1, col2 = st.columns([1, 2])  # Create two columns for input fields
-    with col1:
-        x = st.slider("Position X:", min_value=0, max_value=1000, value=780)
-    with col2:
-        x_input = st.text_input("X Position Manual:", value=str(x))  # Text input for Position X
-    
-    with col1:
-        y = st.slider("Position Y:", min_value=0, max_value=1000, value=128)
-    with col2:
-        y_input = st.text_input("Y Position Manual:", value=str(y))  # Text input for Position Y
-    
-    with col1:
-        font_size = st.slider("Font Size:", min_value=10, max_value=100, value=20)
-    with col2:
-        font_size_input = st.text_input("Font Size Manual:", value=str(font_size))  # Text input for Font Size
+    # Side-by-side input fields for X, Y, and Font Size
+    col1, col2, col3 = st.columns(3)
 
-    # If user manually edits the input fields, update the variables
+    with col1:
+        x_input = st.text_input("Position X:", value=str(default_x))
+    with col2:
+        y_input = st.text_input("Position Y:", value=str(default_y))
+    with col3:
+        size_input = st.text_input("Font Size:", value=str(default_font_size))
+
+    # Convert input to integers
     try:
-        x = int(x_input) if x_input else x
-        y = int(y_input) if y_input else y
-        font_size = int(font_size_input) if font_size_input else font_size
+        x = int(x_input)
     except ValueError:
-        st.warning("Please enter valid numeric values in the manual input fields!")
+        x = default_x
 
-    # Step 7: Draw passport number on image with updated position and font size
-    # Always recreate the image each time to ensure the changes are reflected
-    image = Image.open(uploaded_file)  # Reload the image from uploaded file to preserve it
+    try:
+        y = int(y_input)
+    except ValueError:
+        y = default_y
 
-    draw = ImageDraw.Draw(image)
-    
-    # Try using a default font or load a custom one if available
+    try:
+        font_size = int(size_input)
+    except ValueError:
+        font_size = default_font_size
+
+    # Load font
     try:
         font = ImageFont.truetype("arial.ttf", font_size)
-    except IOError:
-        font = ImageFont.load_default()  # Fallback to default font if custom font is unavailable
+    except:
+        st.warning("Custom font not found. Using default font.")
+        font = ImageFont.load_default()
 
-    # Clear the area where the text will go (optional)
-    draw.rectangle([x-5, y-5, x+200, y+font_size+10], fill="white")
+    # Draw on image
+    draw = ImageDraw.Draw(image)
+    draw.rectangle([x - 5, y - 5, x + 200, y + font_size + 10], fill="white")
     draw.text((x, y), st.session_state.passport_number, fill="black", font=font)
 
-    # Step 8: Display the modified image
+    # Show modified image
     st.image(image, caption="Modified Passport", use_container_width=True)
