@@ -41,11 +41,32 @@ if uploaded_file:
         st.session_state.passport_number = generate_passport_number()
         st.write(f"Generated passport number: **{st.session_state.passport_number}**")
 
-    # Step 6: Draw passport number on image
-    font_size = 20
-    x = 780
-    y = 128
+    # Step 6: Sliders for position (X, Y) and font size
+    col1, col2 = st.columns([1, 2])  # Create two columns for input fields
+    with col1:
+        x = st.slider("Position X:", min_value=0, max_value=1000, value=780)
+    with col2:
+        x_input = st.text_input("X Position Manual:", value=str(x))  # Text input for Position X
+    
+    with col1:
+        y = st.slider("Position Y:", min_value=0, max_value=1000, value=128)
+    with col2:
+        y_input = st.text_input("Y Position Manual:", value=str(y))  # Text input for Position Y
+    
+    with col1:
+        font_size = st.slider("Font Size:", min_value=10, max_value=100, value=20)
+    with col2:
+        font_size_input = st.text_input("Font Size Manual:", value=str(font_size))  # Text input for Font Size
 
+    # If user manually edits the input fields, update the variables
+    try:
+        x = int(x_input) if x_input else x
+        y = int(y_input) if y_input else y
+        font_size = int(font_size_input) if font_size_input else font_size
+    except ValueError:
+        st.warning("Please enter valid numeric values in the manual input fields!")
+
+    # Step 7: Draw passport number on image with updated position and font size
     draw = ImageDraw.Draw(image)
     try:
         font = ImageFont.truetype("arial.ttf", font_size)
@@ -56,5 +77,5 @@ if uploaded_file:
     draw.rectangle([x-5, y-5, x+200, y+font_size+10], fill="white")
     draw.text((x, y), st.session_state.passport_number, fill="black", font=font)
 
-    # Step 7: Display the modified image
+    # Step 8: Display the modified image
     st.image(image, caption="Modified Passport", use_container_width=True)
