@@ -24,3 +24,8 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+
+
+How to Run Locally
+streamlit run app.py
+Then open the browser at http://localhost:8501.
